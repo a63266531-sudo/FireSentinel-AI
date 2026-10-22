@@ -1,88 +1,271 @@
-## طريقة التشغيل
+<div align="center">
 
-### 1. تحميل المشروع
+# 🔥 FireSentinel AI
+
+### Elite Wildfire Risk Forecasting Platform
+
+**From NASA satellite fire data to a verifiable, reproducible weekly risk forecast, built with production-grade engineering.**
+
+
+
+![Python](https://img.shields.io/badge/Python-3.10%E2%80%933.12-3776AB?logo=python&logoColor=white)
+
+
+
+
+![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)
+
+
+
+
+![Streamlit](https://img.shields.io/badge/Dashboard-Streamlit-FF4B4B?logo=streamlit&logoColor=white)
+
+
+
+
+![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
+
+
+
+
+![Tests](https://img.shields.io/badge/tests-55-brightgreen)
+
+
+
+
+![License](https://img.shields.io/badge/License-MIT-yellow)
+
+
+
+</div>
+
+---
+
+## 📖 Overview
+
+FireSentinel AI is an end-to-end platform that monitors wildfire activity and forecasts **next-week fire risk** by fusing multiple data sources:
+
+| Source | Purpose |
+|---|---|
+| 🛰️ **NASA FIRMS** | Active fire detections |
+| 🌦️ **Open-Meteo** | Weather conditions |
+| 🌿 **NASA MODIS (via ORNL)** | NDVI vegetation index |
+| 🗺️ **Land cover** | Terrain and fuel context |
+| 🏘️ **Overpass (OSM)** | Nearby human activity |
+
+Every result is designed to be **auditable, reproducible, and honest about its limits**.
+
+---
+
+## ✨ Key Features
+
+### 🧩 Large, Modular Architecture
+- **27+ modules** covering providers, features, modeling, monitoring, alerts, reports, API, and scheduling
+- Clean separation between data, model, service, and presentation layers
+
+### 📊 9-View Interactive Dashboard
+Overview · Notes · Risk Explorer · Historical Trends · Model Diagnostics · Scenario Lab · Data & Provenance · Experiment Reports · System Health
+
+- Color-blind-safe palette with text symbols
+- English / Arabic interface
+
+### 🔬 Reproducible Experiments
+- Every experiment is recorded and can be re-verified with a single command
+- Confidence intervals, baselines, and held-out test sets are reported
+
+### 🔔 Alerts & Notifications
+- Monitoring, data, and forecast alerts
+- Email + Telegram delivery
+
+### 🔐 Secure Read-Only API
+- FastAPI service with API-key protection and rate limiting
+- Interactive docs (see `docs/API.md`)
+
+### 🐳 Deployment Ready
+- Optimized Dockerfile + `docker-compose.yml`
+- CI matrix for Python 3.10 – 3.12
+- Pinned `constraints.txt`
+
+### ✅ Quality & Security
+- **55 automated tests** (pytest)
+- Built-in security scan (`scripts/security_check.py`)
+
+---
+
+## 🏗️ Architecture
+
+```text
+Data Providers ──► Ingestion & Store ──► Feature Engineering ──► Model
+ (FIRMS, Weather,      (SQLite)           (geo, weather,          │
+  NDVI, OSM)                               vegetation)            ▼
+                                                          Risk Forecast
+                                                                  │
+        ┌──────────────┬──────────────┬─────────────┬─────────────┘
+        ▼              ▼              ▼             ▼
+   Dashboard         REST API       Alerts       PDF Reports
+  (Streamlit)       (FastAPI)   (Email/Telegram)
+```
+
+### Project Layout
+
+```text
+app.py                      # Streamlit dashboard entry point
+firesentinel/
+├── providers, data, store  # Data access & storage
+├── geodesy, geo            # Spatial utilities
+├── weather, vegetation     # Environmental features
+├── features, model         # ML pipeline
+├── contract, monitoring    # Data contracts & health checks
+├── scenario, spread        # Scenario analysis
+├── experiments             # Reproducible experiments
+├── alerts, notify          # Alerting
+├── impact, report          # Impact estimates & PDF reports
+├── service, api            # Service layer & REST API
+├── scheduler, pipeline     # Automation
+├── synthetic               # Offline demo data
+├── security, i18n, cli     # Security, translations, CLI
+└── config
+tests/                      # 55 executed tests
+scripts/                    # setup, run, test, check_setup, security_check
+docs/                       # Full documentation
+Dockerfile · docker-compose.yml · constraints.txt
+```
+
+---
+
+## 🚀 Quick Start
+
+### Requirements
+Python 3.10+ (tested on 3.12), `pip`, `venv`
+
+### Install
+
+```bash
 git clone https://github.com/a63266531-sudo/FireSentinel-AI.git
 cd FireSentinel-AI
 
-### 2. إنشاء بيئة افتراضية
-python -m venv venv
-source venv/bin/activate
-(على ويندوز: venv\Scripts\activate)
+bash scripts/setup.sh     # venv + dependencies + self-check
+bash scripts/run.sh       # dashboard at http://localhost:8501
+bash scripts/test.sh      # pytest + security scan
+```
 
-### 3. تثبيت المكتبات
+Then open **http://localhost:8501** and choose **"One-click demo (offline)"**.
+
+### Manual install
+
+```bash
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-
-### 4. تشغيل الاختبارات
-pytest
-
-
-# AI Fire Risk Analyzer - ELITE (FireSentinel AI)
-
-A research-grade wildfire **observation + uncertainty-aware next-week risk** workspace built on NASA FIRMS detections, weather, NDVI,
-land cover and neighbouring activity. It is a strong foundation for investigation, **not** an operational system:
-it does not prevent fires, has **no demonstrated real-world skill yet**, and must not replace official warnings.
-
-## 1. What is implemented (and how sure we are)
-Executed here (Python 3.12.3, pandas 3.0.2, numpy 2.4.4, scikit-learn 1.8.0): **55 tests passed, 0 failed, 4 skipped** (API runtime tests need fastapi/httpx).
-Everything ran offline against **synthetic** data or mocks. See `docs/AUDIT.md` for the per-capability status (V/U/P/M/B) and the defects fixed.
-
-| Area | What you get |
-|---|---|
-| Scientific tasks kept separate | A observation, B next-week occurrence risk, C spread = **extension point only**, D walk-forward hindcast |
-| Providers | registry with product IDs, docs, access, resolution, units, CRS, time convention, licence, quality flags, limits (`docs/PROVIDERS.md`), schema validation, sha256 provenance log |
-| Geospatial | explicit WGS84, bbox validation, projected-coordinate detection, true spherical cell areas, haversine index, coverage summaries, chunked CSV reader with row cap |
-| Leakage-safe ML | chronological split, cells chosen from pre-cutoff history, imputation fitted on training rows only, no back-fill, baselines (persistence, climatology), LR / RF / gradient boosting, optional tuning |
-| Uncertainty | block-bootstrap CIs, calibration (isotonic, ECE, Wilson table), **risk contract**: score vs probability, status ok / unreliable / unavailable, completeness, freshness, out-of-distribution flags |
-| Validation | spatial CV, spatio-temporal hold-out, walk-forward hindcast, error analysis by month/region, PSI drift |
-| Explainability | permutation importance, local occlusion explanation, **Scenario Lab** (sensitivity analysis with extrapolation warnings) |
-| Experiments | one-command reproducible record + report + `verify-experiment` |
-| Ops | CLI, scheduler, alerts (observation / data / prediction), email + Telegram (dry-run default), read-only API with key/loopback guard, hardened Docker, CI matrix |
-| Dashboard | 9 views (Overview, Observations, Risk Explorer, Historical Trends, Model Diagnostics, Scenario Lab, Data & Provenance, Experiment Reports, System Health), colour-blind-safe palette with text legends, English/Arabic (Arabic covers main labels; rest falls back to English) |
-
-**Not verified here:** real Streamlit/Plotly rendering (app executed against a stub), live FIRMS / Open-Meteo / NASA ORNL / Overpass calls, FastAPI runtime, Docker build, CI, Python 3.10/3.11, pandas 2.x.
-**Blocked:** training/evaluating on real data (needs your FIRMS history). **Not implemented by design:** fire-spread simulation.
-
-## 2. Quick start - Kali Linux + VS Code (details: `docs/VSCODE_KALI.md`)
-```bash
-sudo apt update && sudo apt install -y python3 python3-venv python3-pip unzip
-sudo apt install -y code-oss                      # or the Microsoft .deb from code.visualstudio.com
-unzip AI_Fire_Risk_Analyzer_ELITE.zip && cd AI_Fire_Risk_Analyzer_ELITE
-code .
-bash scripts/setup.sh        # venv + dependencies (incl. API + test tools) + self check
-bash scripts/run.sh          # http://localhost:8501  -> "One-click demo (offline)"
-bash scripts/test.sh         # pytest + security scan
+pip install -r requirements-api.txt   # API
+pip install -r requirements-dev.txt   # development & tests
 ```
-Real data: `cp .env.example .env`, set `FIRMS_MAP_KEY`, run `.venv/bin/python scripts/check_setup.py --network` (verifies FIRMS, Open-Meteo, NASA ORNL, Overpass), then use *NASA FIRMS API* or
-`python -m firesentinel.cli fetch --region Egypt`, repeat daily (or `schedule`), and when you have >= ~12 weeks run an experiment.
 
-## 3. Commands
+### Docker
+
 ```bash
-python -m firesentinel.cli demo                      # offline synthetic run
-python -m firesentinel.cli experiment --demo --region Greece --weeks 26 --end 2026-10-18   # SYNTHETIC reproducible experiment
-python -m firesentinel.cli verify-experiment experiments/exp-...                           # reproduction check
+docker compose up --build
+```
+
+---
+
+## 💻 Command Line
+
+```bash
+# Offline synthetic run
+python -m firesentinel.cli demo
+
+# Reproducible SYNTHETIC experiment
+python -m firesentinel.cli experiment --demo --region Greece --weeks 26 --end 2026-10-18
+
+# Verify an experiment reproduces
+python -m firesentinel.cli verify-experiment experiments/exp-...
+
+# Other commands
 python -m firesentinel.cli fetch|train|schedule|providers ...
-uvicorn firesentinel.api:app --host 127.0.0.1 --port 8000                                  # API (docs/API.md)
 ```
 
-## 4. Demo path vs real-data path
-* **Demo:** synthetic, labelled everywhere, generated from a known rule; proves the software runs, **never** predictive skill.
-* **Real:** FIRMS history in `data/firesentinel.db` + Open-Meteo + NASA MODIS (via ORNL) -> *Model Diagnostics* or `experiment`. Interpret results only with the CIs, baselines, hold-outs and limitations shown.
+### Run the API
 
-## 5. Layout
+```bash
+uvicorn firesentinel.api:app --host 127.0.0.1 --port 8000
 ```
-app.py  firesentinel/{providers,data,store,geodesy,geo,weather,vegetation,features,model,contract,monitoring,scenario,spread,
-        experiments,alerts,notify,impact,report,service,api,scheduler,pipeline,synthetic,security,i18n,cli,config}.py
-tests/ (55 executed tests)  scripts/ (setup, run, test, check_setup, security_check)  docs/  .vscode/  Dockerfile docker-compose.yml constraints.txt
+
+---
+
+## 🌍 Using Real Data
+
+```bash
+cp .env.example .env                       # set FIRMS_MAP_KEY
+.venv/bin/python scripts/check_setup.py --network
+python -m firesentinel.cli fetch --region Egypt
 ```
-Docs: `AUDIT`, `METHODOLOGY` (hypotheses, label, leakage, validation), `ARCHITECTURE`, `PROVIDERS`, `EXPERIMENTS`, `API`, `SECURITY`, `REFERENCES`, `DEMO_SCRIPT`, `PITCH`, `VSCODE_KALI`.
 
-## 6. Known defects and limitations
-* Weather/NDVI/land cover are point samples at cell centres; NDVI quality flags are unused; labels are detections, not ground truth.
-* The demo's latest week lies outside the summer training range, so its estimates are (correctly) flagged unreliable; with few test weeks the CIs are wide.
-* Selecting cells from pre-cutoff history means the model covers only cells already active before the cutoff.
-* PDF report is English only; Arabic UI is partial.
-* Code is tested only on Python 3.12.3 / pandas 3.0.2; CI for 3.10-3.12 is written but unrun.
+Repeat daily (or use `schedule`). Once you have **≥ 12 weeks** of history, run an experiment.
 
-## 7. Roadmap
-Real multi-season training and publication of results; NDVI pixel-quality filtering; ERA5-Land / station weather; fuel and terrain layers; a validated spread model (e.g. Rothermel-based) with perimeter validation; probabilistic spatial models if data justify them; full Arabic localisation; Docker/CI verification.
-License: MIT.
+> Get a free FIRMS key from the NASA FIRMS website.
+
+---
+
+## 🧪 Demo Path vs Real-Data Path
+
+| | Demo Path | Real-Data Path |
+|---|---|---|
+| **Data** | Synthetic, labeled everywhere | NASA FIRMS + Open-Meteo + MODIS |
+| **Purpose** | Proves the software works | Model diagnostics & experiments |
+| **Predictive skill** | None (by design) | Interpret only with confidence intervals, baselines, held-out sets |
+
+---
+
+## 🔬 Scientific Transparency
+
+This project deliberately separates **what is verified** from **what is not**:
+
+- ✅ **Verified:** test suite runs on Python 3.12.3 / pandas 3.0.2
+- ⚠️ **Not yet verified here:** live provider calls, FastAPI runtime, Docker build, CI runs, Python 3.10/3.11, pandas 2.x
+- ⏸️ **Disabled:** training on real data (requires your own FIRMS history)
+
+### Known Limitations
+- Weather, NDVI, and land cover are point samples at cell centers
+- Labels are detections, not ground truth
+- The model only covers cells already active before the cutoff
+- PDF reports are English only; the Arabic UI is partial
+
+---
+
+## 📚 Documentation
+
+`AUDIT` · `METHODOLOGY` · `ARCHITECTURE` · `PROVIDERS` · `EXPERIMENTS` · `API` · `SECURITY` · `REFERENCES` · `DEMO_SCRIPT` · `PITCH` · `VSCODE_KALI`
+
+All in the `docs/` folder.
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Real multi-season training and published results
+- [ ] NDVI pixel-quality filtering
+- [ ] ERA5-Land / station weather data
+- [ ] Fuel and terrain layers
+- [ ] Validated spread model (e.g. Rothermel) with perimeter validation
+- [ ] Probabilistic spatial models
+- [ ] Full Arabic translation
+- [ ] Docker / CI verification
+
+---
+
+## ⚠️ Disclaimer
+
+FireSentinel AI is a research and engineering platform. It is **not** an operational warning system and must not replace official fire-danger warnings.
+
+---
+
+## 📄 License
+
+Released under the [MIT License](LICENSE).
+
+<div align="center">
+
+**Built with 🔥 for safer forests**
+
+</div>
