@@ -1,0 +1,16 @@
+# Upper bounds protect against breaking major releases. Tested here with: Python 3.12.3, pandas 3.0.2, numpy 2.4.4, scikit-learn 1.8.0.
+streamlit<2
+pandas<4
+numpy<3
+scikit-learn<2
+scipy<2
+plotly<7
+requests<3
+joblib<2
+reportlab<5
+matplotlib<4
+markdown<4
+fastapi<1
+uvicorn<1
+httpx<1
+pytest<9

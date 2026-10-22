@@ -1,0 +1,26 @@
+# Optional. Ports are published on localhost only. Secrets come from your shell or .env, never from this file.
+# For the api service set FIRESENTINEL_API_KEY (the container sees the Docker gateway, not loopback, as the client).
+x-hardening: &hardening
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: ["ALL"]
+  read_only: true
+  tmpfs: ["/tmp"]
+  env_file: [{ path: .env, required: false }]
+  volumes: ["./data:/app/data", "./models:/app/models", "./logs:/app/logs", "./experiments:/app/experiments"]
+
+services:
+  app:
+    <<: *hardening
+    build: .
+    ports: ["127.0.0.1:8501:8501"]
+  api:
+    <<: *hardening
+    build: .
+    command: uvicorn firesentinel.api:app --host 0.0.0.0 --port 8000
+    ports: ["127.0.0.1:8000:8000"]
+    environment:
+      FIRESENTINEL_API_KEY: ${FIRESENTINEL_API_KEY:?set FIRESENTINEL_API_KEY in .env}
+  scheduler:
+    <<: *hardening
+    build: .
+    command: python -m firesentinel.cli schedule --region Egypt --every-hours 3
