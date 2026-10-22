@@ -1,3 +1,21 @@
+## طريقة التشغيل
+
+### 1. تحميل المشروع
+git clone https://github.com/a63266531-sudo/FireSentinel-AI.git
+cd FireSentinel-AI
+
+### 2. إنشاء بيئة افتراضية
+python -m venv venv
+source venv/bin/activate
+(على ويندوز: venv\Scripts\activate)
+
+### 3. تثبيت المكتبات
+pip install -r requirements.txt
+
+### 4. تشغيل الاختبارات
+pytest
+
+
 # AI Fire Risk Analyzer - ELITE (FireSentinel AI)
 
 A research-grade wildfire **observation + uncertainty-aware next-week risk** workspace built on NASA FIRMS detections, weather, NDVI,
